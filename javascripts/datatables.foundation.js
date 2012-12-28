@@ -1,3 +1,12 @@
+/* Set the defaults for DataTables initialisation */
+$.extend( true, $.fn.dataTable.defaults, {
+    "sDom": "<'row'<'six columns'l><'six columns'f>r><'row'<'twelve columns't>><'row'<'six columns'i><'six columns'p>>",
+    "sPaginationType": "foundation",
+    "oLanguage": {
+        "sLengthMenu": 'Show <form class="custom dataTables"><select><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select></form> entries'
+    }
+} );
+
 /* API method to get paging information */
 $.fn.dataTableExt.oApi.fnPagingInfo = function ( oSettings )
 {
@@ -88,113 +97,4 @@ $.extend( $.fn.dataTableExt.oPagination, {
         }
     }
 } 
-);
-
-$.extend( $.fn.dataTableExt._fnFeatureHtmlLength = function( oSettings ) {
-    if ( oSettings.oScroll.bInfinite )
-    {
-        return null;
-    }
-    
-    /* This can be overruled by not using the _MENU_ var/macro in the language variable */
-    var sName = 'name="'+oSettings.sTableId+'_length"';
-    var sStdMenu = '<select style="display:none;" id="customDropdown" '+sName+'>';
-    var i, iLen;
-    var aLengthMenu = oSettings.aLengthMenu;
-    
-    if ( aLengthMenu.length == 2 && typeof aLengthMenu[0] === 'object' && 
-            typeof aLengthMenu[1] === 'object' )
-    {
-        for ( i=0, iLen=aLengthMenu[0].length ; i<iLen ; i++ )
-        {
-            sStdMenu += '<option value="'+aLengthMenu[0][i]+'">'+aLengthMenu[1][i]+'</option>';
-        }
-    }
-    else
-    {
-        for ( i=0, iLen=aLengthMenu.length ; i<iLen ; i++ )
-        {
-            sStdMenu += '<option value="'+aLengthMenu[i]+'">'+aLengthMenu[i]+'</option>';
-        }
-    }
-
-    sStdMenu += '</select>';
-    sStdMenu += '<div class="custom dropdown">';
-    sStdMenu += '<a href="#" class="current">'+oSettings._iDisplayLength+'</a>';
-    sStdMenu += '<a href="#" class="selector"></a>';
-    sStdMenu += '<ul>';
-
-    if ( aLengthMenu.length == 2 && typeof aLengthMenu[0] === 'object' && 
-            typeof aLengthMenu[1] === 'object' )
-    {
-        for ( i=0, iLen=aLengthMenu[0].length ; i<iLen ; i++ )
-        {
-            sStdMenu += '<li>'+aLengthMenu[1][i]+'</li>';
-        }
-    }
-    else
-    {
-        for ( i=0, iLen=aLengthMenu.length ; i<iLen ; i++ )
-        {
-            sStdMenu += '<li>'+aLengthMenu[i]+'</li>';
-        }
-    }
-    
-    sStdMenu += '</ul>';
-    sStdMenu += '</div>';
-
-    var nLength = document.createElement( 'div' );
-    if ( !oSettings.aanFeatures.l )
-    {
-        nLength.id = oSettings.sTableId+'_length';
-    }
-    nLength.className = oSettings.oClasses.sLength;
-    nLength.innerHTML = '<label>'+oSettings.oLanguage.sLengthMenu.replace( '_MENU_', sStdMenu )+'</label>';
-    nLength.innerHTML = '<form class="custom">'+oSettings.oLanguage.sLengthMenu.replace( '_MENU_', sStdMenu )+'</form>';
-    
-    /*
-     * Set the length to the current display length - thanks to Andrea Pavlovic for this fix,
-     * and Stefan Skopnik for fixing the fix!
-     */
-    $('select option[value="'+oSettings._iDisplayLength+'"]', nLength).attr("selected", true);
-
-    $('div.custom ul', nLength).on('click', 'li', function(event) {
-        var iVal = $(this).text();
-        
-        /* Update all other length options for the new display */
-        var n = oSettings.aanFeatures.l;
-        for ( i=0, iLen=n.length ; i<iLen ; i++ )
-        {
-            if ( n[i] != this.parentNode )
-            {
-                $('select', n[i]).val( iVal );
-            }
-        }
-        
-        /* Redraw the table */
-        oSettings._iDisplayLength = parseInt(iVal, 10);
-        _fnCalculateEnd( oSettings );
-        
-        /* If we have space to show extra rows (backing up from the end point - then do so */
-        if ( oSettings.fnDisplayEnd() == oSettings.fnRecordsDisplay() )
-        {
-            oSettings._iDisplayStart = oSettings.fnDisplayEnd() - oSettings._iDisplayLength;
-            if ( oSettings._iDisplayStart < 0 )
-            {
-                oSettings._iDisplayStart = 0;
-            }
-        }
-        
-        if ( oSettings._iDisplayLength == -1 )
-        {
-            oSettings._iDisplayStart = 0;
-        }
-        
-        _fnDraw( oSettings );
-    } );
-
-    $('select', nLength).attr('aria-controls', oSettings.sTableId);
-    
-    return nLength;
-}
 );
